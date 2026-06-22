@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galaxia para ti 💖</title>
+<style>
+  body {
+    margin: 0;
+    background: #000;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+  canvas {
+    display: block;
+  }
+  #info {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    color: #ff69b4;
+    font-size: 32px;
+    text-shadow: 0 0 30px #ff1493;
+    z-index: 10;
+  }
+  #btnMusica {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    background: linear-gradient(45deg, #ff69b4, #ff1493);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 0 30px #ff69b4;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+<div id="info">Te amo 💖</div>
+<button id="btnMusica">🎵 Activar música</button>
+<canvas id="galaxia"></canvas>
+
+<audio id="song" loop>
+  <source src="ropa_de_bazar.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const canvas = document.getElementById('galaxia');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const estrellas = [];
+const textosAmor = [];
+let angulo = 0;
+
+// "TE AMO" EN 50 IDIOMAS
+const amorIdiomas = [
+  "Te amo", "I love you", "Je t'aime", "Ich liebe dich", "Ti amo", "Eu te amo",
+  "Te quiero", "Seni seviyorum", "Kocham cię", "Я тебя люблю", "爱你", "愛してる",
+  "सप्यार", "أحبك", "אני אוהב אותך", "Σ'αγαπώ", "Taimรักคุณ", "Mahal kita",
+  "사랑해", "मैं तुमसे प्यार करता हूं", "Grádh agam ort", "Is gra leat", "Inaamin you",
+  "Mo ninu re", "Obò wo ni", "Kus aš tave", "Es tevi mīlu", "Jag älskar dig",
+  "Minä rakastan sinua", "Jeg elsker deg", "Ég elska þig", "Mahal kita", "Szeretlek",
+  "Te iubesc", "Volim te", "Ľúbim ťa", "Ljubim te", "Sevgi u ku", "Taimรักคุณ",
+  "Nakupenda", "Anabem you", "Oja lẹ", "Ke a go rata", "Ndi na-ahụ gị n'anya",
+  "Nindakuthanda", "Kiya e ku", "Aku cinta kamu"
+];
+
+// 1200 estrellas
+for(let i = 0; i < 1200; i++){
+  const ang = i * 0.25;
+  const radio = i * 0.35;
+  estrellas.push({
+    x: canvas.width/2 + Math.cos(ang) * radio,
+    y: canvas.height/2 + Math.sin(ang) * radio,
+    size: Math.random() * 2.5 + 0.5,
+    color: `hsl(${280 + Math.random()*60}, 100%, ${70 + Math.random()*30}%)`,
+    velocidad: 0.001 + Math.random() * 0.002
+  });
+}
+
+// 50 textos "Te amo" flotando
+for(let i = 0; i < amorIdiomas.length; i++){
+  const ang = (i / amorIdiomas.length) * Math.PI * 2;
+  const radio = 200 + Math.random() * 150;
+  textosAmor.push({
+    texto: amorIdiomas[i],
+    x: canvas.width/2 + Math.cos(ang) * radio,
+    y: canvas.height/2 + Math.sin(ang) * radio,
+    size: 14 + Math.random() * 8,
+    color: `hsl(${320 + Math.random()*40}, 100%, 80%)`,
+    angulo: ang,
+    radio: radio,
+    velocidad: 0.0005 + Math.random() * 0.001
+  });
+}
+
+function dibujar(){
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // Dibujar estrellas
+  estrellas.forEach(e => {
+    const rotX = (e.x - canvas.width/2) * Math.cos(angulo) - (e.y - canvas.height/2) * Math.sin(angulo) + canvas.width/2;
+    const rotY = (e.x - canvas.width/2) * Math.sin(angulo) + (e.y - canvas.height/2) * Math.cos(angulo) + canvas.height/2;
+
+    ctx.beginPath();
+    ctx.arc(rotX, rotY, e.size, 0, Math.PI*2);
+    ctx.fillStyle = e.color;
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = e.color;
+    ctx.fill();
+  });
+
+  // Dibujar "Te amo" girando
+  textosAmor.forEach(t => {
+    const rotX = (t.x - canvas.width/2) * Math.cos(angulo*0.5) - (t.y - canvas.height/2) * Math.sin(angulo*0.5) + canvas.width/2;
+    const rotY = (t.x - canvas.width/2) * Math.sin(angulo*0.5) + (t.y - canvas.height/2) * Math.cos(angulo*0.5) + canvas.height/2;
+
+    ctx.font = `${t.size}px Arial`;
+    ctx.fillStyle = t.color;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = t.color;
+    ctx.textAlign = 'center';
+    ctx.fillText(t.texto, rotX, rotY);
+  });
+
+  angulo += 0.002;
+  requestAnimationFrame(dibujar);
+}
+dibujar();
+
+// Música
+const song = document.getElementById('song');
+const btn = document.getElementById('btnMusica');
+let sonando = false;
+
+btn.onclick = () => {
+  if(!sonando){
+    song.play();
+    btn.textContent = '⏸️ Pausar música';
+    sonando = true;
+  } else {
+    song.pause();
+    btn.textContent = '🎵 Activar música';
+    sonando = false;
+  }
+};
+
+window.onresize = () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+};
+</script>
+</body>
+</html>
